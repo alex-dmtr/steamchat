@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Online friends</h2>
+    {% for friend in online_friends %}
+        <h3>{{ friend.name }}</h3>
+    {% endfor %}
+{% endblock %}
