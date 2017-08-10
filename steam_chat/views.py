@@ -1,11 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
+from django.views import View
 from django.views.generic import TemplateView
 import lib.steamapi as steamapi
-from lib.steamapi.enums import PersonaState
+from lib.steamapi.enums import PersonaState, LoggedIn
 
 steam = steamapi.steamapi()
 
@@ -13,14 +15,16 @@ def is_steam_auth(request):
     try:
         if not 'steamguard' in request.session or not 'oauth_token' in request.session:
             raise 'Not logged in'
-        steam.session.cookies.clear()
         steamguard = request.session['steamguard']
         token = request.session['oauth_token']
-
+        steam.session.cookies.clear()
         steam.oauth_login(steamguard, token)
 
-        # also login to chat.
         steam.chat.login()
+
+        # also login to chat.
+        # if not steam.chat.logged_in == LoggedIn.LoggedIn:
+        #     steam.chat.login()
 
         return True
     except Exception as e:
@@ -42,6 +46,7 @@ class Index(TemplateView):
 
             if friend.state == PersonaState.Online:
                 online_friends.append({
+                    'steam_id': friend.steam_id,
                     'name': friend.name
                 })
 
@@ -85,3 +90,16 @@ class Login(TemplateView):
             request.session['oauth_client_id'] = steam.oauth_client_id
 
             return redirect('/')
+
+
+class SendMessage(View):
+    def post(self, request):
+        if not is_steam_auth(request):
+            return redirect(self.login_url)
+
+        friend = request.POST['friend']
+        message = request.POST['message']
+
+        steam.chat.send_message(recipient=friend, text=message)
+
+        return HttpResponse(200)

@@ -20,5 +20,6 @@ from steam_chat import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.Index.as_view(), name='index'),
-    url(r'^login/', views.Login.as_view(), name='login')
+    url(r'^login/', views.Login.as_view(), name='login'),
+    url(r'^api/send_message', views.SendMessage.as_view(), name='send_message')
 ]

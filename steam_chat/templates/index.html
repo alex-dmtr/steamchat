@@ -3,6 +3,26 @@
 {% block content %}
     <h2>Online friends</h2>
     {% for friend in online_friends %}
-        <h3>{{ friend.name }}</h3>
+        <h3><a href="#" onclick="send({{ friend.steam_id }})">{{ friend.name }}</a></h3>
     {% endfor %}
+
+    <script type="text/javascript">
+
+        function send(friend, message)
+        {
+            var SEND_URL = "{% url 'send_message' %}";
+
+            message = message || "Hello there!";
+            message += "\nSent from Steam Messenger";
+
+            $.ajax({
+                url: SEND_URL,
+                method: 'POST',
+                data: {
+                    friend: friend,
+                    message: message
+                }
+            })
+        }
+    </script>
 {% endblock %}
